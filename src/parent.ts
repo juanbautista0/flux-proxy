@@ -4,7 +4,7 @@
  * @internal This module is for internal use only
  */
 
-import { ACTION_GET_DATA, ACTION_INIT, ACTION_READY, IGNORE_SOURCES, RESPONSE_SUFFIX } from "./constants";
+import { ACTION_GET_DATA, ACTION_INIT, ACTION_POST_DATA, ACTION_READY, IGNORE_SOURCES, RESPONSE_SUFFIX } from "./constants";
 import { EventResponse, ProxyBridge } from "./types";
 
 /** Set to track active requests and prevent duplicate processing */
@@ -40,20 +40,20 @@ export class ParentClient {
         ignoreSources: string[] = IGNORE_SOURCES
     ): Promise<void> {
         // Validate message and check if it should be ignored
-        if (!ParentClient.isValidMessage(data) || 
+        if (!ParentClient.isValidMessage(data) ||
             String(data?.source).includes(ignoreSources.join())) {
             return;
         }
 
         const message = data;
         const { action, requestId, origin } = message;
-        
+
         // Prevent duplicate processing of the same request
         if (!requestId || ACTIVE_REQUESTS.has(requestId)) return;
-        
+
         // Mark request as active
         ACTIVE_REQUESTS.add(requestId);
-        
+
         let payload: EventResponse = {} as EventResponse;
 
         try {
@@ -68,7 +68,6 @@ export class ParentClient {
                 }
 
                 case ACTION_GET_DATA: {
-                    // Process data request and prepare response
                     const result = await dataSource(message);
                     payload = {
                         action: `${ACTION_GET_DATA}${RESPONSE_SUFFIX}`,
@@ -78,7 +77,16 @@ export class ParentClient {
                     };
                     break;
                 }
-
+                case ACTION_POST_DATA: {
+                    const result = await dataSource(message);
+                    payload = {
+                        action: `${ACTION_POST_DATA}${RESPONSE_SUFFIX}`,
+                        data: result,
+                        requestId,
+                        originCheck: origin,
+                    };
+                    break;
+                }
                 default: {
                     throw new Error("Unrecognized action");
                 }

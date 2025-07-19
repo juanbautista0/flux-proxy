@@ -1,5 +1,5 @@
 import { ChildClient } from '../src/child';
-import { ACTION_GET_DATA } from '../src/constants';
+import { ACTION_GET_DATA, ACTION_POST_DATA } from '../src/constants';
 
 describe('ChildClient', () => {
   let childClient: ChildClient;
@@ -163,6 +163,88 @@ describe('ChildClient', () => {
           options: query,
           page,
           perPage
+        }),
+        target
+      );
+    });
+  });
+  
+  describe('postData', () => {
+    test('should send data and return response on success', async () => {
+      const mockData = { id: 1, name: 'Test Item' };
+      const mockResponse = { success: true, id: 1 };
+      const collection = 'test-collection';
+      
+      // Call postData
+      const dataPromise = childClient.postData(collection, mockData);
+      
+      // Verify addEventListener was called
+      expect(mockAddEventListener).toHaveBeenCalledWith('message', expect.any(Function));
+      
+      // Verify postMessage was called with correct arguments
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: ACTION_POST_DATA,
+          collection,
+          data: mockData
+        }),
+        '*'
+      );
+      
+      // Simulate response from parent
+      const requestId = mockPostMessage.mock.calls[0][0].requestId;
+      messageEventCallback({
+        data: {
+          action: `${ACTION_POST_DATA}_response`,
+          requestId,
+          data: mockResponse
+        }
+      });
+      
+      // Check result
+      const [response, error] = await dataPromise;
+      expect(response).toEqual(mockResponse);
+      expect(error).toBeUndefined();
+    });
+    
+    test('should handle errors when posting data', async () => {
+      const mockData = { id: 1, name: 'Test Item' };
+      const errorMessage = 'Invalid data format';
+      const collection = 'test-collection';
+      
+      // Call postData
+      const dataPromise = childClient.postData(collection, mockData);
+      
+      // Simulate error response from parent
+      const requestId = mockPostMessage.mock.calls[0][0].requestId;
+      messageEventCallback({
+        data: {
+          action: `${ACTION_POST_DATA}_response`,
+          requestId,
+          error: errorMessage
+        }
+      });
+      
+      // Check result
+      const [data, error] = await dataPromise;
+      expect(data).toBeUndefined();
+      expect(error).toBeInstanceOf(Error);
+      expect(error?.message).toBe(errorMessage);
+    });
+    
+    test('should send data to custom target', async () => {
+      const mockData = { id: 1, name: 'Test Item' };
+      const collection = 'test-collection';
+      const target = 'https://example.com';
+      
+      // Call postData with custom target
+      childClient.postData(collection, mockData, target);
+      
+      expect(mockPostMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: ACTION_POST_DATA,
+          collection,
+          data: mockData
         }),
         target
       );

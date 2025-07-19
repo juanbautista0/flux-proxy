@@ -1,5 +1,5 @@
 import { ParentClient } from '../src/parent';
-import { ACTION_READY, ACTION_INIT, ACTION_GET_DATA, RESPONSE_SUFFIX } from '../src/constants';
+import { ACTION_READY, ACTION_INIT, ACTION_GET_DATA, ACTION_POST_DATA, RESPONSE_SUFFIX } from '../src/constants';
 
 describe('ParentClient', () => {
   // Mock for ProxyBridge
@@ -89,6 +89,32 @@ describe('ParentClient', () => {
           action: `${ACTION_GET_DATA}${RESPONSE_SUFFIX}`,
           data: mockResult,
           requestId: 'data-id',
+          originCheck: 'test-origin',
+        },
+        '*'
+      );
+    });
+    
+    test('should handle ACTION_POST_DATA', async () => {
+      const message = { 
+        action: ACTION_POST_DATA, 
+        requestId: 'post-data-id', 
+        origin: 'test-origin',
+        collection: 'test-collection',
+        data: { id: 1, name: 'Test Item' }
+      };
+      
+      const mockResult = { success: true, id: 1 };
+      mockDataSource.mockResolvedValueOnce(mockResult);
+      
+      await ParentClient.onMessage(message, mockHandler, mockDataSource);
+      
+      expect(mockDataSource).toHaveBeenCalledWith(message);
+      expect(mockHandler.postMessage).toHaveBeenCalledWith(
+        {
+          action: `${ACTION_POST_DATA}${RESPONSE_SUFFIX}`,
+          data: mockResult,
+          requestId: 'post-data-id',
           originCheck: 'test-origin',
         },
         '*'

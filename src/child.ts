@@ -4,7 +4,7 @@
  */
 
 import { PostMessageRequest, PostMessageResponse, Query } from "./types";
-import { ACTION_GET_DATA } from "./constants";
+import { ACTION_GET_DATA, ACTION_POST_DATA } from "./constants";
 
 /**
  * ChildClient handles communication from child contexts to parent
@@ -104,6 +104,30 @@ export class ChildClient {
             }, target);
 
             return [data, undefined];
+        } catch (err) {
+            return [undefined, err as Error];
+        }
+    }
+    
+    /**
+     * Send data to the parent context
+     * @param collection - The data collection to post to
+     * @param data - The data to send
+     * @param target - Optional target origin for postMessage
+     * @returns Promise with tuple containing [response, error]
+     */
+    public async postData<R, T>(
+        collection: string,
+        data: T,
+        target?: string
+    ): Promise<[R | undefined, Error | undefined]> {
+        try {
+            const response = await this.postMessageToParent(ACTION_POST_DATA, {
+                collection,
+                data,
+            }, target);
+
+            return [response, undefined];
         } catch (err) {
             return [undefined, err as Error];
         }
