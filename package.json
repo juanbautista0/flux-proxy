@@ -1,9 +1,10 @@
 {
   "name": "flux-proxy",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A proxy bridge for cross-context communication",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "repository": "https://github.com/juanbautista0/flux-proxy",
   "files": [
     "dist"
   ],
