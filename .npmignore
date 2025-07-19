@@ -1,0 +1,24 @@
+# Source files
+src/
+
+# Examples
+examples/
+
+# Development files
+.git/
+.github/
+.vscode/
+node_modules/
+.gitignore
+.eslintrc*
+.prettierrc*
+tsconfig.json
+
+# Tests
+__tests__/
+*.test.ts
+*.spec.ts
+
+# Misc
+*.log
+.DS_Store

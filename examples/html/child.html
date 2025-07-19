@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flux-Proxy - Child Example</title>
+    <script src="../../dist/index.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        button { margin: 10px 0; padding: 8px 16px; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Flux-Proxy - Child Context</h1>
+    <button id="requestData">Request Data</button>
+    <div>
+        <h3>Response:</h3>
+        <pre id="response">Waiting for request...</pre>
+    </div>
+
+    <script>
+        // Function to request data from the parent
+        async function fetchData() {
+            const responseElement = document.getElementById('response');
+            responseElement.textContent = 'Requesting data...';
+            
+            try {
+                // Use FluxProxy to request data
+                const [data, error] = await FluxProxy.childClient.getData('users');
+                
+                if (error) {
+                    responseElement.textContent = `Error: ${error.message}`;
+                    return;
+                }
+                
+                responseElement.textContent = JSON.stringify(data, null, 2);
+            } catch (err) {
+                responseElement.textContent = `Unexpected error: ${err.message}`;
+            }
+        }
+
+        // Set up the button to request data
+        document.getElementById('requestData').addEventListener('click', fetchData);
+    </script>
+</body>
+</html>
