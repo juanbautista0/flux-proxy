@@ -115,6 +115,10 @@ To run tests in watch mode during development:
 npm run test:watch
 ```
 
+### Video example use
+
+[![video]](https://drive.google.com/file/d/16MFViVwiH3K56dHbMaLkWmlgrV_TuyJV/view?usp=sharing)
+
 ## License
 
 MIT
